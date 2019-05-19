@@ -1,0 +1,143 @@
+<html>
+<body >
+<style>
+
+body{
+	background-color:black;
+	color:white;
+	padding: 8px;
+	display:block;
+}
+
+table {
+  border-collapse: collapse;
+  width:600px;
+}
+
+tabble, th, td {
+	padding: 2px;
+	border-style: solid;
+	border-color: grey;
+}
+
+textarea{
+    outline: none !important;
+
+	border:2px solid grey;
+	width:600px;
+	height:300px;
+	margin:5px 0;
+	padding:3px;
+}
+
+</style>
+
+<table>
+    <tbody>
+        <tr>
+            <td>SDIO signal</td>
+            <td>RPi HAT</td>
+            <td>ESP-12F pin / signal
+                <br>
+            </td>
+            <td>ESP-03 pin / signal</td>
+        </tr>
+        <tr>
+            <td>CLK</td>
+            <td>15 / GPIO22</td>
+            <td>14 / SCLK</td>
+            <td>Flash pin 6 (CLK)</td>
+        </tr>
+        <tr>
+            <td>CMD</td>
+            <td>16 / GPIO23</td>
+            <td>9 / CS0</td>
+            <td>Flash pin 1 (/CS)</td>
+        </tr>
+        <tr>
+            <td>D0</td>
+            <td>18 / GPIO24</td>
+            <td>10 / MISO</td>
+            <td>Flash pin 2 (DO)</td>
+        </tr>
+        <tr>
+            <td>D1</td>
+            <td>22 / GPIO25</td>
+            <td>13 / MOSI</td>
+            <td>Flash pin 5 (DI)</td>
+        </tr>
+        <tr>
+            <td>D2 (optional for 1-bit)</td>
+            <td>37 / GPIO26</td>
+            <td>11 / GPIO9</td>
+            <td>Flash pin 7 (HOLD)</td>
+        </tr>
+        <tr>
+            <td>D3 (optional for 1-bit)</td>
+            <td>13 / GPIO27</td>
+            <td>12 / GPIO10
+                <br>
+            </td>
+            <td>Flash pin 3 (WP)</td>
+        </tr>
+        <tr>
+            <td>-</td>
+            <td>1 or 17 / 3.3V</td>
+            <td>8 / VCC</td>
+            <td>Module 1 / VCC</td>
+        </tr>
+        <tr>
+            <td>-</td>
+            <td>2, 4, 14, or 20 / GND</td>
+            <td>15 / GND</td>
+            <td>Module 8 / GND</td>
+        </tr>
+        <tr>
+            <td>-</td>
+            <td>27 / ID_SD</td>
+            <td>3 / CH_PD</td>
+            <td>Module 13 / CH_PD</td>
+        </tr>
+    </tbody>
+</table>
+<p>Skip D2 and D3 for 1-bit SDIO.</p>
+
+<textarea width="600px">
+#make sure everything is up to date
+sudo apt-get update && sudo apt-get -y upgrade
+
+#install module build dependencies
+sudo apt-get -y install dkms raspberrypi-kernel-headers
+
+#4-bit SDIO setup
+sudo sed -i -e "/^dtoverlay.*sdio/d" /boot/config.txt
+sudo sh -c 'echo "dtoverlay=sdio,poll_once=off" >> /boot/config.txt'
+
+#1-bit SDIO setup
+sudo sed -i -e "/^dtoverlay.*sdio/d" /boot/config.txt
+sudo sh -c 'echo "dtoverlay=sdio,poll_once=off,bus_width=1" >> /boot/config.txt' 
+
+#add reset ESP8266 reset pin(CH_PD)
+sudo sh -c 'echo "options esp8089 esp_reset_gpio=4" > /etc/modprobe.d/esp.conf'
+
+#reboot
+sudo reboot 
+
+#Get debian file.
+
+
+#extract and run package
+gunzip esp8089-dkms_1.9.20180430_all.deb.gz
+sudo dpkg -i esp8089-dkms_1.9.20180430_all.deb
+
+#add ESP8089 to be loaded at boot.
+sudo sed -i '/eps8089/d' /etc/modules
+sudo sh -c 'echo "esp8089" >> /etc/modules'
+
+
+
+</textarea>
+
+
+</body>
+</html>
